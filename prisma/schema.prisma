@@ -1,0 +1,82 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  assignedTasks Task[]   @relation("AssignedTasks")
+}
+
+model Client {
+  id        String   @id @default(cuid())
+  name      String
+  email     String?
+  phone     String?
+  company   String?
+  notes          String?
+  telegramChatId String?
+  tasks          Task[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Task {
+  id            String     @id @default(cuid())
+  trackingId    String     @unique
+  title         String
+  description   String?
+  status        String     @default("DRAFT")
+  priority      String     @default("MEDIUM")
+  price         Float      @default(0)
+  dpAmount      Float      @default(0)
+  paymentStatus String     @default("UNPAID")
+  dueDate       DateTime?
+  notes         String?
+  clientId      String?
+  client        Client?        @relation(fields: [clientId], references: [id])
+  assigneeId    String?
+  assignee      User?          @relation("AssignedTasks", fields: [assigneeId], references: [id])
+  files         TaskFile[]
+  paymentProofs PaymentProof[]
+  auditLogs     AuditLog[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model TaskFile {
+  id        String   @id @default(cuid())
+  filename  String
+  filepath  String
+  fileType  String
+  taskId    String
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String
+  details   String
+  taskId    String
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model PaymentProof {
+  id        String   @id @default(cuid())
+  filename  String
+  filepath  String
+  taskId    String
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}

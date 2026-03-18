@@ -1,0 +1,55 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+# Cancel in-progress jobs or runs for the same ref
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build_and_test:
+    name: Build, Lint, and Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm' # Automates ~/.npm caching
+
+      # Setup environment variables needed by Next.js Build / Prisma
+      # Ideally secrets should be configured in GitHub settings if you access real URLs
+      - name: Create .env
+        run: |
+          echo "DATABASE_URL=\"postgresql://dummy:dummy@localhost:5432/dummy\"" > .env
+          echo "DIRECT_URL=\"postgresql://dummy:dummy@localhost:5432/dummy\"" >> .env
+          echo "NEXT_PUBLIC_SITE_URL=\"http://localhost:3000\"" >> .env
+          echo "JWT_SECRET=\"dummy_super_secret_for_ci\"" >> .env
+          echo "API_AUTH_KEY=\"dummy_api_key\"" >> .env
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Check TypeScript Validity
+        run: npx tsc --noEmit
+
+      - name: Run Next.js Linter
+        run: npm run lint
+
+      - name: Run Unit Tests (Vitest)
+        run: npm run test -- --run
+
+      - name: Build Next.js Application
+        run: npm run build
