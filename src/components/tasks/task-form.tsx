@@ -2,6 +2,7 @@
 
 import { createTask } from "@/lib/actions/tasks";
 import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -40,12 +41,11 @@ export function TaskForm({
   users: UserAdmin[];
 }) {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
   const [clients, setClients] = useState(initialClients);
   const [selectedClient, setSelectedClient] = useState<string>("");
+  const [selectedAssignee, setSelectedAssignee] = useState<string>("NONE");
 
   async function handleSubmit(formData: FormData) {
-    setLoading(true);
     try {
       const result = await createTask(formData);
       if ("error" in result) {
@@ -56,8 +56,6 @@ export function TaskForm({
       }
     } catch {
       toast.error("Gagal membuat tugas");
-    } finally {
-      setLoading(false);
     }
   }
 
@@ -92,7 +90,11 @@ export function TaskForm({
               <div className="flex gap-2 items-center">
                 <Select name="clientId" value={selectedClient} onValueChange={(val) => setSelectedClient(val || "")}>
                   <SelectTrigger className="bg-background/50 flex-1">
-                    <SelectValue placeholder="Pilih klien (opsional) ..." />
+                    <span className="truncate">
+                      {selectedClient === "NONE" 
+                        ? "-- Tanpa Klien --" 
+                        : (selectedClient ? `${clients.find((c) => c.id === selectedClient)?.name || selectedClient} ${clients.find((c) => c.id === selectedClient)?.company ? `(${clients.find((c) => c.id === selectedClient)?.company})` : ""}` : "Pilih klien (opsional) ...")}
+                    </span>
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="NONE" className="text-muted-foreground italic">
@@ -118,9 +120,13 @@ export function TaskForm({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="assigneeId">Penerima Tugas</Label>
-              <Select name="assigneeId" defaultValue="NONE">
+              <Select name="assigneeId" value={selectedAssignee} onValueChange={(val) => setSelectedAssignee(val || "NONE")}>
                 <SelectTrigger className="bg-background/50">
-                  <SelectValue placeholder="-- Belum Ditugaskan --" />
+                  <span className="truncate">
+                    {selectedAssignee === "NONE" 
+                      ? "-- Belum Ditugaskan --" 
+                      : (selectedAssignee ? (users.find((u) => u.id === selectedAssignee)?.name || users.find((u) => u.id === selectedAssignee)?.email || selectedAssignee) : "-- Belum Ditugaskan --")}
+                  </span>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="NONE" className="text-muted-foreground italic">
@@ -189,14 +195,11 @@ export function TaskForm({
                 <ArrowLeft className="w-4 h-4" /> Kembali
               </Button>
             </Link>
-            <Button
-              type="submit"
-              disabled={loading}
+            <SubmitButton
+              defaultText="Buat Tugas"
+              loadingText="Membuat..."
               className="gap-2"
-            >
-              <Save className="w-4 h-4" />
-              {loading ? "Membuat..." : "Buat Tugas"}
-            </Button>
+            />
           </div>
         </form>
       </CardContent>

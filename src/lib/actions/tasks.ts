@@ -24,19 +24,34 @@ export async function createTask(formData: FormData) {
   const assigneeIdForm = formData.get("assigneeId") as string;
   const assigneeId = assigneeIdForm && assigneeIdForm !== "NONE" ? assigneeIdForm : undefined;
 
-  const task = await prisma.task.create({
-    data: {
-      trackingId: generateTrackingId(),
-      title,
-      description,
-      clientId,
-      assigneeId,
-      priority,
-      price,
-      dueDate: dueDate ? new Date(dueDate) : null,
-      notes,
-    },
-  });
+  let task;
+  let retries = 3;
+  while (retries > 0) {
+    try {
+      task = await prisma.task.create({
+        data: {
+          trackingId: generateTrackingId(),
+          title,
+          description,
+          clientId,
+          assigneeId,
+          priority,
+          price,
+          dueDate: dueDate ? new Date(dueDate) : null,
+          notes,
+        },
+      });
+      break;
+    } catch (error: any) {
+      if (error.code === 'P2002' && retries > 1) {
+        retries--;
+        continue;
+      }
+      return { error: 'Gagal membuat tugas. Silakan coba lagi.' };
+    }
+  }
+
+  if (!task) return { error: 'Gagal membuat tugas unik.' };
 
   await prisma.auditLog.create({
     data: {

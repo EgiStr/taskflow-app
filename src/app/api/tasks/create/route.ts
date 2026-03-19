@@ -60,51 +60,54 @@ export async function POST(request: Request) {
       );
     }
 
-    // 4. Upsert client by name (find-or-create)
-    let client = await prisma.client.findFirst({
+    const updates: Record<string, string | null> = {};
+    if (clientPhone) updates.phone = clientPhone;
+    if (clientEmail) updates.email = clientEmail;
+    if (telegramChatId) updates.telegramChatId = telegramChatId;
+
+    const client = await prisma.client.upsert({
       where: { name: clientName },
-    });
-
-    let isNewClient = false;
-
-    if (!client) {
-      client = await prisma.client.create({
-        data: {
-          name: clientName,
-          phone: clientPhone || null,
-          email: clientEmail || null,
-          telegramChatId: telegramChatId || null,
-        },
-      });
-      isNewClient = true;
-    } else {
-      // Update existing client with new info if provided
-      const updates: Record<string, string | null> = {};
-      if (clientPhone && !client.phone) updates.phone = clientPhone;
-      if (clientEmail && !client.email) updates.email = clientEmail;
-      if (telegramChatId && !client.telegramChatId) updates.telegramChatId = telegramChatId;
-
-      if (Object.keys(updates).length > 0) {
-        client = await prisma.client.update({
-          where: { id: client.id },
-          data: updates,
-        });
-      }
-    }
-
-    // 5. Create task
-    const trackingId = generateTrackingId();
-    const task = await prisma.task.create({
-      data: {
-        trackingId,
-        title,
-        description: description || null,
-        priority: priority || "MEDIUM",
-        price: price || 0,
-        dueDate: deadline ? new Date(deadline) : null,
-        clientId: client.id,
+      update: updates,
+      create: {
+        name: clientName,
+        phone: clientPhone || null,
+        email: clientEmail || null,
+        telegramChatId: telegramChatId || null,
       },
     });
+    
+    const isNewClient = Date.now() - client.createdAt.getTime() < 5000;
+
+    // 5. Create task with retry for unique trackingId
+    let task = null;
+    let trackingId = "";
+    let retries = 3;
+    
+    while (retries > 0) {
+      try {
+        trackingId = generateTrackingId();
+        task = await prisma.task.create({
+          data: {
+            trackingId,
+            title,
+            description: description || null,
+            priority: priority || "MEDIUM",
+            price: price || 0,
+            dueDate: deadline ? new Date(deadline) : null,
+            clientId: client.id,
+          },
+        });
+        break;
+      } catch (error: any) {
+        if (error.code === 'P2002' && retries > 1) {
+          retries--;
+          continue;
+        }
+        throw error;
+      }
+    }
+    
+    if (!task) throw new Error("Gagal membuat tracking ID unik");
 
     // 6. Audit log
     await prisma.auditLog.create({

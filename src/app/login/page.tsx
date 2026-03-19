@@ -5,7 +5,7 @@ import { login } from "@/lib/actions/auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { Lock, Mail } from "lucide-react";
 import Image from "next/image";
 
@@ -68,20 +68,11 @@ export default function LoginPage() {
                 />
               </div>
             </div>
-            <Button
-              type="submit"
+            <SubmitButton
+              defaultText="Masuk"
+              loadingText="Memproses..."
               className="w-full h-11 font-medium transition-colors"
-              disabled={pending}
-            >
-              {pending ? (
-                <span className="flex items-center gap-2">
-                  <span className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                  Memproses...
-                </span>
-              ) : (
-                "Masuk"
-              )}
-            </Button>
+            />
           </form>
         </CardContent>
       </Card>

@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/actions/clients";
 import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/ui/submit-button";
 import {
   Dialog,
   DialogContent,
@@ -24,10 +25,7 @@ export function ClientFormDialog({
   wrapperClassName?: string;
 } = {}) {
   const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-
   async function handleSubmit(formData: FormData) {
-    setLoading(true);
     try {
       const result = await createClient(formData);
       if ("error" in result) {
@@ -41,8 +39,6 @@ export function ClientFormDialog({
       }
     } catch {
       toast.error("Gagal membuat klien");
-    } finally {
-      setLoading(false);
     }
   }
 
@@ -83,13 +79,11 @@ export function ClientFormDialog({
             <Label htmlFor="notes">Catatan</Label>
             <Textarea id="notes" name="notes" className="bg-background/50" />
           </div>
-          <Button
-            type="submit"
-            disabled={loading}
+          <SubmitButton
+            defaultText="Buat Klien"
+            loadingText="Membuat..."
             className="w-full"
-          >
-            {loading ? "Membuat..." : "Buat Klien"}
-          </Button>
+          />
         </form>
       </DialogContent>
       </Dialog>

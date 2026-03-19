@@ -12,9 +12,17 @@ export async function createClient(formData: FormData) {
 
   if (!name) return { error: "Name is required" };
 
-  const client = await prisma.client.create({
-    data: { name, email, phone, company, notes },
-  });
+  let client;
+  try {
+    client = await prisma.client.create({
+      data: { name, email, phone, company, notes },
+    });
+  } catch (error: any) {
+    if (error.code === 'P2002') {
+      return { error: `Klien dengan nama "${name}" sudah ada.` };
+    }
+    return { error: "Gagal membuat klien" };
+  }
 
   revalidatePath("/admin/clients");
   return { success: true, client };
@@ -27,10 +35,17 @@ export async function updateClient(clientId: string, formData: FormData) {
   const company = formData.get("company") as string;
   const notes = formData.get("notes") as string;
 
-  await prisma.client.update({
-    where: { id: clientId },
-    data: { name, email, phone, company, notes },
-  });
+  try {
+    await prisma.client.update({
+      where: { id: clientId },
+      data: { name, email, phone, company, notes },
+    });
+  } catch (error: any) {
+    if (error.code === 'P2002') {
+      return { error: `Klien dengan nama "${name}" sudah ada.` };
+    }
+    return { error: "Gagal memperbarui klien" };
+  }
 
   revalidatePath("/admin/clients");
   revalidatePath(`/admin/clients/${clientId}`);
