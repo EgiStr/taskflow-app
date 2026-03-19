@@ -10,7 +10,6 @@ import {
   Building,
   Mail,
   Phone,
-  DollarSign,
   Calendar,
   StickyNote,
   ArrowUpRight,

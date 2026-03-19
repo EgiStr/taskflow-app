@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // Dynamic imports are used inside the function to avoid Next.js SSR errors with jspdf
 
 type InvoiceData = {

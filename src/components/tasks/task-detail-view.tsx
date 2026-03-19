@@ -77,7 +77,8 @@ type UserAdmin = { id: string; name: string | null; email: string };
 
 export function TaskDetailView({
   task,
-  clients,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  clients: _clients,
   users,
 }: {
   task: TaskWithRelations;

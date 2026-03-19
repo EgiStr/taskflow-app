@@ -29,7 +29,6 @@ export async function createTask(formData: FormData) {
       trackingId: generateTrackingId(),
       title,
       description,
-      // @ts-ignore - Prisma type definition is stale due to previous dev-server lock
       clientId,
       assigneeId,
       priority,

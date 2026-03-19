@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { join } from "path";
 import { readFile } from "fs/promises";
-import { cookies } from "next/headers";
 import { getSession } from "@/lib/auth";
 
 export async function GET(

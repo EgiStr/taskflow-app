@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { createTask, updateTaskStatus, updateTask, deleteTask } from './tasks'
 import { prismaMock } from '../__mocks__/prisma'

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { getAllUsers } from './users'
 import { prismaMock } from '../__mocks__/prisma'

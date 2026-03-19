@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import { TaskDetailView } from "@/components/tasks/task-detail-view";

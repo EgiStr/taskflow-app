@@ -3,7 +3,6 @@ import { prisma } from "@/lib/prisma";
 import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 import { v4 as uuidv4 } from "uuid";
-import { cookies } from "next/headers";
 import { getSession } from "@/lib/auth";
 
 export async function POST(req: Request) {

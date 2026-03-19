@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { FileUpload } from "@/components/files/file-upload";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function formatCurrency(amount: number) {
   return new Intl.NumberFormat("id-ID", {
     style: "currency",

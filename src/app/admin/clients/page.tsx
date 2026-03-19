@@ -1,9 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Plus, Building, Mail, Phone, DollarSign } from "lucide-react";
+import { Building, Mail, Phone, DollarSign } from "lucide-react";
 import { ClientFormDialog } from "@/components/clients/client-form-dialog";
 
 function formatCurrency(amount: number) {
