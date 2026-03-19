@@ -5,17 +5,30 @@ const bcryptjs = require("bcryptjs");
 const prisma = new PrismaClient();
 
 async function main() {
-  const hashedPassword = await bcryptjs.hash("admin123", 10);
-  const admin = await prisma.user.upsert({
-    where: { email: "admin@taskflow.com" },
+
+  const eggiPassword = await bcryptjs.hash("Bukain123", 10);
+  const eggi = await prisma.user.upsert({
+    where: { email: "eggi.1224450032@student.itera.ac.id" },
     update: {},
     create: {
-      email: "admin@taskflow.com",
-      password: hashedPassword,
-      name: "Admin TaskFlow",
+      email: "eggi.1224450032@student.itera.ac.id",
+      password: eggiPassword,
+      name: "Eggi Satria",
     },
   });
-  console.log("Created admin:", admin.email);
+  console.log("Created user:", eggi.email);
+
+  const rahmaPassword = await bcryptjs.hash("Bukain123", 10);
+  const rahma = await prisma.user.upsert({
+    where: { email: "rahma.1224450036@student.itera.ac.id" },
+    update: {},
+    create: {
+      email: "rahma.1224450036@student.itera.ac.id",
+      password: rahmaPassword,
+      name: "Rahma Neliyana",
+    },
+  });
+  console.log("Created user:", rahma.email);
 
   const client1 = await prisma.client.create({
     data: {

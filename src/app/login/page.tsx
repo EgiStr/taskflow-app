@@ -50,7 +50,6 @@ export default function LoginPage() {
                   type="email"
                   placeholder="admin@taskflow.com"
                   className="pl-10 h-11"
-                  defaultValue="admin@taskflow.com"
                   required
                 />
               </div>
@@ -65,7 +64,6 @@ export default function LoginPage() {
                   type="password"
                   placeholder="••••••••"
                   className="pl-10 h-11"
-                  defaultValue="admin123"
                   required
                 />
               </div>
@@ -85,9 +83,6 @@ export default function LoginPage() {
               )}
             </Button>
           </form>
-          <p className="text-xs text-muted-foreground text-center mt-6">
-            Demo: admin@taskflow.com / admin123
-          </p>
         </CardContent>
       </Card>
     </div>
