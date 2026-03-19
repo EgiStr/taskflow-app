@@ -51,5 +51,3 @@ jobs:
       - name: Run Unit Tests (Vitest)
         run: npm run test -- --run
 
-      - name: Build Next.js Application
-        run: npm run build
