@@ -32,7 +32,7 @@ describe('Auth Actions', () => {
       formData.append('email', 'test@test.com')
 
       const result = await login(undefined, formData) as any
-      expect(result.error).toBe('Email and password are required')
+      expect(result.error).toBe('Email dan kata sandi wajib diisi.')
       expect(prismaMock.user.findUnique).not.toHaveBeenCalled()
     })
 
@@ -44,7 +44,7 @@ describe('Auth Actions', () => {
       prismaMock.user.findUnique.mockResolvedValue(null)
 
       const result = await login(undefined, formData) as any
-      expect(result.error).toBe('Invalid email or password')
+      expect(result.error).toBe('Email atau kata sandi tidak valid.')
     })
 
     it('returns error if password incorrect', async () => {
@@ -56,7 +56,21 @@ describe('Auth Actions', () => {
       mockCompare.mockResolvedValue(false)
 
       const result = await login(undefined, formData) as any
-      expect(result.error).toBe('Invalid email or password')
+      expect(result.error).toBe('Email atau kata sandi tidak valid.')
+    })
+
+    it('returns safe message when database connection fails', async () => {
+      const formData = new FormData()
+      formData.append('email', 'test@test.com')
+      formData.append('password', 'password123')
+
+      prismaMock.user.findUnique.mockRejectedValue(
+        new Error('Error querying the database: FATAL: Tenant or user not found')
+      )
+
+      const result = await login(undefined, formData) as any
+      expect(result.error).toBe('Koneksi database sedang bermasalah. Silakan coba lagi beberapa saat.')
+      expect(mockRedirect).not.toHaveBeenCalled()
     })
 
     it('creates session and redirects on success', async () => {

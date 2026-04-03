@@ -20,9 +20,15 @@ const statusLabels: Record<string, string> = {
 export function TaskStatusActions({
   taskId,
   currentStatus,
+  onStatusChanged,
+  onRequestStatusChange,
+  disabled = false,
 }: {
   taskId: string;
   currentStatus: string;
+  onStatusChanged?: (newStatus: string) => void;
+  onRequestStatusChange?: (newStatus: string) => void;
+  disabled?: boolean;
 }) {
   const [isPending, startTransition] = useTransition();
   const currentIndex = statusFlow.indexOf(currentStatus);
@@ -30,13 +36,20 @@ export function TaskStatusActions({
   if (currentStatus === "COMPLETED" || currentStatus === "CANCELED") return null;
 
   const nextStatus = currentIndex < statusFlow.length - 1 ? statusFlow[currentIndex + 1] : null;
+  const isDisabled = isPending || disabled;
 
   const handleStatusChange = (newStatus: string) => {
+    if (onRequestStatusChange) {
+      onRequestStatusChange(newStatus);
+      return;
+    }
+
     startTransition(async () => {
       const result = await updateTaskStatus(taskId, newStatus);
       if (result.error) {
         toast.error(result.error);
       } else {
+        onStatusChanged?.(newStatus);
         toast.success(`Status diperbarui menjadi ${statusLabels[newStatus]}`);
       }
     });
@@ -50,7 +63,7 @@ export function TaskStatusActions({
           size="sm"
           className="h-7 text-[11px] text-primary hover:text-primary/80 hover:bg-primary/10 flex-1"
           onClick={() => handleStatusChange(nextStatus)}
-          disabled={isPending}
+          disabled={isDisabled}
         >
           <ArrowRight className="w-3 h-3 mr-1" />
           {statusLabels[nextStatus]}
@@ -61,7 +74,7 @@ export function TaskStatusActions({
         size="sm"
         className="h-7 text-[11px] text-muted-foreground hover:text-red-400 hover:bg-red-500/10"
         onClick={() => handleStatusChange("CANCELED")}
-        disabled={isPending}
+        disabled={isDisabled}
       >
         <X className="w-3 h-3" />
       </Button>
