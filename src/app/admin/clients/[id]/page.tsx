@@ -15,6 +15,8 @@ import {
   ArrowUpRight,
 } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 function formatCurrency(amount: number) {
   return new Intl.NumberFormat("id-ID", {
     style: "currency",

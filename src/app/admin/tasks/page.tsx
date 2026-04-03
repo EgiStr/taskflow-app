@@ -6,6 +6,8 @@ import Link from "next/link";
 import { Plus, Calendar, User } from "lucide-react";
 import { TaskStatusActions } from "@/components/tasks/task-status-actions";
 
+export const dynamic = "force-dynamic";
+
 function formatCurrency(amount: number) {
   return new Intl.NumberFormat("id-ID", {
     style: "currency",

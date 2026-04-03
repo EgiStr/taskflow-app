@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import { TaskDetailView } from "@/components/tasks/task-detail-view";
 
+export const dynamic = "force-dynamic";
+
 export default async function TaskDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 

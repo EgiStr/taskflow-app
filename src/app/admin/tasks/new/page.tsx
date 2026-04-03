@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { TaskForm } from "@/components/tasks/task-form";
 
+export const dynamic = "force-dynamic";
+
 export default async function NewTaskPage() {
   const clients = await prisma.client.findMany({
     orderBy: { name: "asc" },

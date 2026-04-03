@@ -6,6 +6,8 @@ import { PaymentActions } from "@/components/payments/payment-actions";
 import InvoiceDownloadButton from "@/components/payments/invoice-download-button";
 import { DollarSign, CheckCircle2, Clock, TrendingUp } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 function formatCurrency(amount: number) {
   return new Intl.NumberFormat("id-ID", {
     style: "currency",

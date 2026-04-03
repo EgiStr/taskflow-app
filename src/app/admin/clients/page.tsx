@@ -5,6 +5,8 @@ import Link from "next/link";
 import { Building, Mail, Phone, DollarSign } from "lucide-react";
 import { ClientFormDialog } from "@/components/clients/client-form-dialog";
 
+export const dynamic = "force-dynamic";
+
 function formatCurrency(amount: number) {
   return new Intl.NumberFormat("id-ID", {
     style: "currency",

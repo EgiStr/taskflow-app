@@ -4,6 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Activity, ArrowUpRight } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 const actionColors: Record<string, string> = {
   TASK_CREATED: "bg-blue-500/10 text-blue-400 border-blue-500/20",
   STATUS_CHANGE: "bg-amber-500/10 text-amber-400 border-amber-500/20",

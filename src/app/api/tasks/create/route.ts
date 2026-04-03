@@ -47,7 +47,10 @@ export async function POST(request: Request) {
     };
 
     // 3. Validate required fields
-    if (!clientName || !title) {
+    const normalizedClientName = clientName?.trim();
+    const normalizedTitle = title?.trim();
+
+    if (!normalizedClientName || !normalizedTitle) {
       return NextResponse.json(
         {
           success: false,
@@ -60,23 +63,41 @@ export async function POST(request: Request) {
       );
     }
 
-    const updates: Record<string, string | null> = {};
-    if (clientPhone) updates.phone = clientPhone;
-    if (clientEmail) updates.email = clientEmail;
-    if (telegramChatId) updates.telegramChatId = telegramChatId;
+    const updates: {
+      phone?: string | null;
+      email?: string | null;
+      telegramChatId?: string | null;
+    } = {};
+    if (typeof clientPhone !== "undefined") updates.phone = clientPhone || null;
+    if (typeof clientEmail !== "undefined") updates.email = clientEmail || null;
+    if (typeof telegramChatId !== "undefined") updates.telegramChatId = telegramChatId || null;
 
-    const client = await prisma.client.upsert({
-      where: { name: clientName },
-      update: updates,
-      create: {
-        name: clientName,
-        phone: clientPhone || null,
-        email: clientEmail || null,
-        telegramChatId: telegramChatId || null,
-      },
+    const existingClient = await prisma.client.findFirst({
+      where: { name: normalizedClientName },
+      orderBy: { createdAt: "desc" },
     });
-    
-    const isNewClient = Date.now() - client.createdAt.getTime() < 5000;
+
+    let client;
+    let isNewClient = false;
+
+    if (!existingClient) {
+      client = await prisma.client.create({
+        data: {
+          name: normalizedClientName,
+          phone: clientPhone || null,
+          email: clientEmail || null,
+          telegramChatId: telegramChatId || null,
+        },
+      });
+      isNewClient = true;
+    } else if (Object.keys(updates).length > 0) {
+      client = await prisma.client.update({
+        where: { id: existingClient.id },
+        data: updates,
+      });
+    } else {
+      client = existingClient;
+    }
 
     // 5. Create task with retry for unique trackingId
     let task = null;
@@ -89,7 +110,7 @@ export async function POST(request: Request) {
         task = await prisma.task.create({
           data: {
             trackingId,
-            title,
+            title: normalizedTitle,
             description: description || null,
             priority: priority || "MEDIUM",
             price: price || 0,
@@ -98,8 +119,14 @@ export async function POST(request: Request) {
           },
         });
         break;
-      } catch (error: any) {
-        if (error.code === 'P2002' && retries > 1) {
+      } catch (error: unknown) {
+        const isUniqueConstraintError =
+          typeof error === "object" &&
+          error !== null &&
+          "code" in error &&
+          (error as { code?: string }).code === "P2002";
+
+        if (isUniqueConstraintError && retries > 1) {
           retries--;
           continue;
         }
@@ -114,10 +141,10 @@ export async function POST(request: Request) {
       data: {
         action: "TASK_CREATED",
         details: JSON.stringify({
-          title,
+          title: normalizedTitle,
           status: "DRAFT",
           source: "n8n-api",
-          clientName,
+          clientName: normalizedClientName,
         }),
         taskId: task.id,
       },
@@ -128,7 +155,7 @@ export async function POST(request: Request) {
     fireWebhook("task.created", {
       taskId: task.id,
       trackingId,
-      title,
+      title: normalizedTitle,
       status: "DRAFT",
       client: {
         id: client.id,
