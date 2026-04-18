@@ -14,6 +14,11 @@ export type WebhookPayload = {
  * Non-blocking — errors are logged but never thrown.
  */
 export function fireWebhook(event: WebhookEvent, data: Record<string, unknown>) {
+  // Sementara di-disable (langsung return) agar fitur webhook N8N 
+  // tidak memblokir atau memperlambat fungsionalitas utama aplikasi
+  return;
+
+  /*
   const webhookUrl = process.env.N8N_WEBHOOK_URL;
   if (!webhookUrl) {
     console.warn("[Webhook] N8N_WEBHOOK_URL is not configured, skipping.");
@@ -37,6 +42,7 @@ export function fireWebhook(event: WebhookEvent, data: Record<string, unknown>) 
   }).catch((err) => {
     console.error(`[Webhook] Failed to fire event "${event}":`, err.message || err);
   });
+  */
 }
 
 /**
