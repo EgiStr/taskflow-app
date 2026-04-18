@@ -26,13 +26,16 @@ export function fireWebhook(event: WebhookEvent, data: Record<string, unknown>) 
     data,
   };
 
-  // Fire-and-forget: do NOT await
+  // Fire-and-forget: do NOT await, but we MUST add a timeout
+  // because Next.js tracks background fetches and will delay 
+  // the server action response until the fetch resolves.
   fetch(webhookUrl, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
+    signal: AbortSignal.timeout(3000), // 3-second timeout
   }).catch((err) => {
-    console.error(`[Webhook] Failed to fire event "${event}":`, err);
+    console.error(`[Webhook] Failed to fire event "${event}":`, err.message || err);
   });
 }
 
