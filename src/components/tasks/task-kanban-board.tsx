@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useTransition, useEffect } from "react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -32,6 +32,13 @@ export function TaskKanbanBoard({ initialTasks }: TaskKanbanBoardProps) {
   const [draggingTaskId, setDraggingTaskId] = useState<string | null>(null);
   const [dropTargetStatus, setDropTargetStatus] = useState<string | null>(null);
   const [pendingTaskIds, setPendingTaskIds] = useState<string[]>([]);
+  const [isPending, startTransition] = useTransition();
+
+  // Sinkronisasi dengan server data: Update tasks ketika RSC payload baru (initialTasks) tiba.
+  // Ini penting agar state sinkron setelah Next.js memanggil revalidatePath.
+  useEffect(() => {
+    setTasks(initialTasks);
+  }, [initialTasks]);
 
   const columns = useMemo(() => groupTasksByStatus(tasks), [tasks]);
 
@@ -47,7 +54,10 @@ export function TaskKanbanBoard({ initialTasks }: TaskKanbanBoardProps) {
     setTasks(moveResult.nextTasks);
     setPendingTaskIds((current) => (current.includes(taskId) ? current : [...current, taskId]));
 
-    void (async () => {
+    // Membungkus Next.js Server Action dalam startTransition sangat diwajibkan 
+    // ketika mengubah dari Synthetic Event seperti Drag and Drop, agar pemanggilan 
+    // network internal Next.js App Router stabil dan promise queue terbaca.
+    startTransition(async () => {
       try {
         const result = await updateTaskStatus(taskId, targetStatus);
         if (result.error) {
